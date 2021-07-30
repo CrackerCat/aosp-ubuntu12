@@ -9,3 +9,13 @@ RUN aptitude -q -y install git gnupg flex bison gperf build-essential zip curl l
 RUN ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so
 RUN mkdir /usr/lib/jvm && cd /usr/lib/jvm && curl -o jdk.bin "$JDK_BIN_URL" && chmod +x jdk.bin && ./jdk.bin && rm jdk.bin
 ENV PATH="${JDK_PATH}/bin:${PATH}"
+
+# 添加用户
+RUN useradd --create-home --no-log-init --shell /bin/bash aosp \
+&& adduser aosp sudo \
+&& echo 'aosp:123456' | chpasswd
+
+# android source volume
+USER aosp
+WORKDIR /home/aosp
+ENV USER aosp
