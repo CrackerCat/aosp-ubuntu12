@@ -1,18 +1,36 @@
-name: Docker Image CI
+name: BuildDockerfileImage
 
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+  # 防止 Fork 乱用 actions 设置只能手动触发构建
+  workflow_dispatch:
+  repository_dispatch:
+    types: build_docker_image
 
 jobs:
-
-  build:
-
+  build-and-push:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: 构建并推送到 Dockerhub 镜像仓库
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile # Dockerfile 位置
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ckcat/actions_build_aosp12 # 改成你自己的， dockerhub用户名/镜像名
