@@ -33,4 +33,4 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            ckcat/aosp-ubuntu18 # 改成你自己的， dockerhub用户名/镜像名
+            ckcat/aosp12
